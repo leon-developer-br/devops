@@ -1,0 +1,132 @@
+apiVersion - versao da api do kubernets. a versao da API muda conforme o recurso
+kind - tipo de objeto a ser implantado
+metadata 
+    - name: nome do pod
+    - labels: 
+        - app: tagear um recurso para gerenciar como um grupo
+spec:
+    containers:
+    - name: nome do container
+    image: imagem a ser aplicada
+
+
+* kubectl apply -f [manifest.yaml]
+* kubectl get pods 
+* kubectl get pods -w
+* kubectl get pods [pod-name]
+* kubectl get pods -l app=nginx
+* kubectl get deployments
+* kubectl delete pod [pod-name(s)]
+* kubectl delete deployments [deployment-name]
+* kubectl describe [resource-type = pod|deployment] [nome-do-recurso]
+* kubectl logs [nome-do-pod]
+* kubectl exec -it [nome-do-pod]] /bin/bash
+* kubectl get service
+* kubectl get ep my-service - quais pods estao abaixo deste servico?
+* kubectl get node
+* kubectl describe node
+Aplicacoes diferentes devem estar em pods separados. Isso me permite ter uma granularidade maior para escalar o pod especifico necessairo.
+
+*** Tipos (kinds)
+
+apiVersion: v1
+kind: Pod
+
+apiVersion: apps/v1
+kind: Deployment
+
+
+*** Pod
+
+Cada pode ter um endereco IP. Logo, um novo pod tem um endereco IP novo. Os enderecos IP sao dinamicos. 
+Para expor uma aplicacao, a maneira correta é usar o <service>
+
+get pods -l app=app -l tier=tier < pesquisa de pods por labels
+
+*** Service
+
+Abstrai a comunicacao entre os servicos. Cada deployment possui um proxy (service). O roteamento pelos pods é feito via selector.labels.
+Um service recebe as requisicoes e encaminha para todos os pods que possuem um label especifico. 
+
+Ao inves de especificar o IP do pod, é especificado o nome do servico (proxy). Existe um DNS interno.
+
+
+*** Escalonando aplicações
+
+Aumentar de 3 para 6 pods.
+
+1) replicar o yaml com o numero maior de replicas.
+2) kubectl scale deployment/[nomedodeployment] --replicas 10
+3) é possivel escalar automaticamente com a carga
+
+Tipos
+- ClusterIP: expor apenas a aplicacao internamente dentro do K8S. É o tipo de servico padrao.
+- NodePort: abre uma porta aleatoria para expor a informacao. é a forma mais bruta. 80:30982/TCP para acessar usamos a porta 30982. Nao devemos usar em producao
+- LoadBalancer: é a forma ideal para producao. Não é aberto uma porta aleatoria. O servico fica em Pending. Temos que informar qual o IP externo de entrada para aplicar o recurso
+de load balancer.
+
+
+*** Implantacoes
+
+A K8S trabalha com o conceito de implatancoes continuas de forma incrmental.
+
+kubectl edit deployments/[name] para editar um manifesto aplicado
+
+*** Tipo de controladores
+
+1 - Deployment
+
+É um controlador que organiza  a execução dos pods. Se dizemos que temos q ter 3 instancias de uma aplicacao rodando, ele irá manter este estado funcionado. Ele monitora constantemete
+para saber se os pods em execução respeitam o que foi solicitado. É um recurso de self healing. 
+
+*** Atualizacoes continuas
+
+Role Update um pod é morto apenas quando um pod com a atualizacao do aplicativo esteja no ar  e recebendo trafego. Atualizacao de forma incremental com downtime = 0
+
+
+*** CRD
+
+kubectl apply -f crd.yaml
+kubectl delete -f crd.yaml
+kubectl apply -f object-crd.yaml
+kubectl get [spec.names.kind] - kafkaconsumers
+
+
+
+***********
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment // serve de prefixo para o nome do pod
+  labels:
+    app: nginx
+spec:
+  replicas: 3 // quantos podems rodando desta implantacao
+  selector:
+    matchLabels:
+      app: nginx // os pods que possuem esta label, sejam gerenciados como um grupo
+  template: // os pods implantados tem que ter os metadados e specificacoes abaixo mencionadas
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+        
+        
+microk8s.kubectl [get | delete] pv [name]
+microk8s.kubectl [get | delete] pvc [name]
+microk8s.kubectl [get | delete] deploy [name]
+microk8s.kubectl [get | delete] ingress [name]
+microk8s.kubectl [get | delete] service [name]
+
+sudo microk8s.kubectl delete pv node-persistent-volume;
+sudo microk8s.kubectl delete pvc node-persistent-volume-claim;
+sudo microk8s.kubectl delete deploy nginx-deployment;
+sudo microk8s.kubectl delete ingress nginx-ingress;
+sudo microk8s.kubectl delete service nginx-service;

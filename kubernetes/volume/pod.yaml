@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: task-pod
+spec:
+  volumes:
+    - name: task-storage
+      persistentVolumeClaim:
+        # é o nome do claim e não o nome do storage
+        claimName: task-claim
+  containers:
+    - name: task-storage
+      image: nginx
+      ports:
+        - containerPort: 80
+          name: "http-server"
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: task-storage
+# microk8s.kubectl apply -f pod.yaml
+# microk8s.kubectl get pods
+# microk8s.kubectl exec -it task-pod -- /bin/bash
+# microk8s.kubectl delete pod/task-pod
+

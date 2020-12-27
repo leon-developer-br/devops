@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-slave
+  labels:
+    app: redis
+    role: slave
+    tier: backend
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: redis
+    role: slave
+    tier: backend
+# microk8s.kubectl apply -f redis-slave-service.yaml
+# sudo microk8s.kubectl get services

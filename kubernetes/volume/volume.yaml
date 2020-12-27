@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/home/leonardo/Linux/Work/learn/kubernets/volume/data"
+# microk8s.kubectl apply -f volume.yaml
+# microk8s.kubectl get persistentvolume ou pv
